@@ -1,0 +1,32 @@
+name: Build CI
+
+on:
+  push:
+    branches: [ "master" ]
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: "0" # pulls all history and tags for Lerna to detect what packages changed.
+        token: ${{ secrets.GIT_TOKEN }} # this token is available by default
+
+    # 使用阿里云镜像服务action
+    - name: Login to Aliyun Container Registry (ACR)
+      uses: aliyun/acr-login@v1 # 使用阿里云镜像服务action
+      with:
+        login-server: registry.cn-shanghai.aliyuncs.com # 务必正确填写镜像容器服务的登录地址
+        region-id: cn-shanghai # 务必正确填写镜像容器服务的登录地址
+        username: "${{ secrets.REGISTRY_USERNAME }}" # 引用GitHub repo设置的镜像容器服务用户名
+        password: "${{ secrets.REGISTRY_PASSWORD }}" # 引用GitHub repo设置的镜像容器服务密码
+
+    - name: Build and Push Docker Image
+      env:
+        IMAGE_TAG: ${{ github.sha }} # 用于标记容器版本号
+      run: |
+        docker build -t registry.cn-shanghai.aliyuncs.com/togii/nest-server-user:latest .
+        docker push registry.cn-shanghai.aliyuncs.com/togii/nest-server-user:latest
