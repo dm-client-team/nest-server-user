@@ -8,6 +8,7 @@ WORKDIR /app
 # RUN npm config set registry http://1.15.102.208:4873
 # RUN yarn config set registry http://1.15.102.208:4873
 # 安装依赖
+RUN npm install pnpm -g
 RUN pnpm install
 RUN pnpm build
 # 对外暴露的端口，这里的3010需要和inde.js监听的端口一致
